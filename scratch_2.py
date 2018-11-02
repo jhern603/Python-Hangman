@@ -1,41 +1,34 @@
+#DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
+#SSN: 123-45-7890
+#BUGS: Cannot check for multiple letters, does not check for incorrect variable type
+#TODO: Add in inf mistakes and hints capability
 import random
 import time
 import collections
 import sys
 class hangman_logic:
-    #Cannot check for multiple letters, does not check for incorrect variable type
-
     def __init__(self):
-
         self.words = ['abaft', 'spiffy', 'flag', 'deep', 'fill', 'outstanding', 'maid', 'tacit', 'suspect', 'spiders',
                  'toys', 'ill-fated', 'summer', 'punch', 'godly', 'snow', 'appear', 'amount', 'cup', 'private',
                  'parcel', 'different', 'sign', 'apparatus', 'fair', 'afternoon', 'bea', 'snakes', 'fancy', 'smile',
                  'kiss']
-        self.picker = random.randint(0, len(self.words)) - 2
-        self.word_selector()
-        print("Your word is: "+str(len(self.word))+" characters long.")
-        time.sleep(1.5)
-        self.ask_mistakes()
-        while self.is_int is False:
-            self.ask_mistakes()
-        time.sleep(.300)
-        self.ask_hints()
-        while self.is_inth is False:
-            self.ask_hints()
-        time.sleep(.300)
         self.guessed_correctly=[]
         self.incorrectly_guessed=[]
         self.mistakes=0
         self.hint_count=0
+        self.win_counter=0
+        self.loss_counter=0
         print("\n\nHangman is starting soon...\n")
         time.sleep(1)
 
     def ask_mistakes(self):
         self.is_int=False
         self.allowable_mistakes = input("What do you want to be the maximum number of mistakes? ")
-        if self.allowable_mistakes != '' and int(self.allowable_mistakes) > 0 :
+        if self.allowable_mistakes != '' and int(self.allowable_mistakes) > 0 and int(self.allowable_mistakes) <len(self.word):
             print("The maximum number of mistakes you can make this round is: " + self.allowable_mistakes + '\n')
             self.is_int=True
+        elif int(self.allowable_mistakes) > len(self.word):
+            print("\nThe maximum amount of mistakes allowed is up to the length of the word.\n")
         elif self.allowable_mistakes == '':
             print('Insert an integer! \n')
             self.is_int = False
@@ -43,9 +36,11 @@ class hangman_logic:
     def ask_hints(self):
         self.is_inth=False
         self.allowable_hints = input("What do you want the maximum number of hints to be? ")
-        if self.allowable_hints != '' and int(self.allowable_hints) > 0 :
+        if self.allowable_hints != '' and int(self.allowable_hints) > 0 and int(self.allowable_hints) < len(self.word):
             print("The maximum number of hints you can request this round is: " + self.allowable_hints + '\n')
             self.is_inth=True
+        elif int(self.allowable_hints) > len(self.word):
+            print("\nThe maximum amount of hints allowed are up to the length of the word.\n")
         elif self.allowable_hints == '':
             print('Insert an integer! \n')
             self.is_inth = False
@@ -66,11 +61,17 @@ class hangman_logic:
         if choice in self.word and choice not in self.guessed_correctly and choice != ''and choice != float():
             self.correct()
         elif 'hint count' in self.user_choice:
-            print("You have requested"+ str(self.hint_count) +" hints.")
+            if self.hint_count<=1:
+                print("You have requested "+ str(self.hint_count) +" hints.")
+            else:
+                print("You have requested " + str(self.hint_count) + " hints.")
         elif 'hint' in choice:
             self.hint()
         elif 'mistakes' in self.user_choice:
-            print("You have made "+str(self.mistakes)+" mistakes.")
+            if self.mistakes <= 1:
+                print("You have made "+str(self.mistakes)+" mistake.")
+            else:
+                print("You have made "+str(self.mistakes)+" mistakes.")
         else:
             self.incorrect()
 
@@ -87,7 +88,6 @@ class hangman_logic:
         if self.user_choice in self.word and len(self.guessed_correctly) <= len(self.word):
             self.guessed_correctly.append(self.user_choice)
             print("\n'"+self.user_choice.upper() + "' was correct.\n")
-        return len(self.guessed_correctly)
 
     def incorrect(self):
         if self.user_choice in self.guessed_correctly:
@@ -98,13 +98,41 @@ class hangman_logic:
             self.incorrectly_guessed.append(self.user_choice)
             print("\n'"+self.user_choice.upper() + "' was incorrect.")
         if self.mistakes >= len(self.word) or self.mistakes >= int(self.allowable_mistakes):
-                print("\nYou have made too many incorrect guesses. The correct word was '"+self.word+"'\n")
+            print("\nYou have made too many incorrect guesses. The correct word was '"+self.word+"'\n")
+            self.loss_counter+=1
+            self.guessed_correctly = []
+            self.incorrectly_guessed = []
+            self.fail_again=input("Do you want to play again? ").lower()
+            if 'y' in self.fail_again:
+                self.play()
+            else:
+                sys.exit(1)
 
     def play(self):
+        self.picker = random.randint(0, len(self.words)) - 2
+        self.word_selector()
+        print("Your word is: " + str(len(self.word)) + " characters long.")
+        time.sleep(1.5)
+        self.ask_mistakes()
+        while self.is_int is False:
+            self.ask_mistakes()
+        time.sleep(.300)
+        self.ask_hints()
+        while self.is_inth is False:
+            self.ask_hints()
+        time.sleep(.300)
         while True:
             if len(self.word) == len(self.guessed_correctly):
                 print("You win! The word was '" + self.word + "!'\n")
-                sys.exit(1)
+                self.win_again = input("Do you want to play again? ").lower()
+                self.win_counter+=1
+                print(self.win_counter)
+                self.guessed_correctly = []
+                self.incorrectly_guessed = []
+                if 'y' in self.win_again:
+                    self.play()
+                else:
+                    sys.exit(1)
             self.user_choice = input("\nPick a letter:").lower()
             self.evaluate(self.user_choice)
             print(self.guessed_correctly)
