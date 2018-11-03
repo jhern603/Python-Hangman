@@ -1,17 +1,17 @@
 #DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
 #SSN: 123-45-7890
-#BUGS: Cannot check for multiple letters, does not check for incorrect variable type
-#TODO: Add in inf mistakes and hints capability
+#BUGS: array of correctly guessed letters are printed, alpha checker
+#NOTES: Added ability to check for repeated characters
+#TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
+#NOTES FOR FUTURE DEV: Categories by dictionary
 import random
 import time
 import collections
 import sys
 class hangman_logic:
+    #Initializes base variables
     def __init__(self):
-        self.words = ['abaft', 'spiffy', 'flag', 'deep', 'fill', 'outstanding', 'maid', 'tacit', 'suspect', 'spiders',
-                 'toys', 'ill-fated', 'summer', 'punch', 'godly', 'snow', 'appear', 'amount', 'cup', 'private',
-                 'parcel', 'different', 'sign', 'apparatus', 'fair', 'afternoon', 'bea', 'snakes', 'fancy', 'smile',
-                 'kiss']
+        self.words = ['abaft', 'ill-fated']
         self.guessed_correctly=[]
         self.incorrectly_guessed=[]
         self.mistakes=0
@@ -20,61 +20,74 @@ class hangman_logic:
         self.loss_counter=0
         print("\n\nHangman is starting soon...\n")
         time.sleep(1)
-
+    #Asks the user for max number of mistakes for that round
     def ask_mistakes(self):
-        self.is_int=False
+        self.is_int = False
         self.allowable_mistakes = input("What do you want to be the maximum number of mistakes? ")
-        if self.allowable_mistakes != '' and int(self.allowable_mistakes) > 0 and int(self.allowable_mistakes) <len(self.word):
-            print("The maximum number of mistakes you can make this round is: " + self.allowable_mistakes + '\n')
-            self.is_int=True
-        elif int(self.allowable_mistakes) > len(self.word):
-            print("\nThe maximum amount of mistakes allowed is up to the length of the word.\n")
-        elif self.allowable_mistakes == '':
-            print('Insert an integer! \n')
+        try:
+            int(self.allowable_mistakes)
+            self.is_int = True
+            if self.allowable_mistakes != '' and int(self.allowable_mistakes) <= len(self.word):
+                print("The maximum number of mistakes you can make this round is: " + self.allowable_mistakes + '\n')
+            elif int(self.allowable_mistakes) > len(self.word):
+                print("\nThe maximum amount of mistakes allowed is up to the length of the word.\n")
+                self.ask_mistakes()
+        except ValueError:
             self.is_int = False
-
+            print("Strings are not accepted: insert an integer!")
+    # Asks the user for max number of hints for that round
     def ask_hints(self):
         self.is_inth=False
         self.allowable_hints = input("What do you want the maximum number of hints to be? ")
-        if self.allowable_hints != '' and int(self.allowable_hints) > 0 and int(self.allowable_hints) < len(self.word):
-            print("The maximum number of hints you can request this round is: " + self.allowable_hints + '\n')
-            self.is_inth=True
-        elif int(self.allowable_hints) > len(self.word):
-            print("\nThe maximum amount of hints allowed are up to the length of the word.\n")
-        elif self.allowable_hints == '':
-            print('Insert an integer! \n')
+        try:
+            int(self.allowable_mistakes)
+            if self.allowable_hints != '' and int(self.allowable_hints) <= len(self.word):
+                print("The maximum number of hints you can request this round is: " + self.allowable_hints + '\n')
+                self.is_inth = True
+            elif int(self.allowable_hints) > len(self.word):
+                print("\nThe maximum amount of hints allowed are up to the length of the word.\n")
+        except ValueError:
+            print("Strings are not accepted: insert an integer!")
             self.is_inth = False
-
+    # Check for character repetition in selected string
+    def isRepeated(self):
+        self.isRepeated = False
+        self.charRepeated = []
+        for k in self.counter:
+            if self.counter[k] > 1:
+                self.charRepeated.append(k)
+                self.isRepeated = True
+    # Selects a string for the round
     def word_selector(self):
         self.word = self.words[self.picker].lower()
         self.counter= collections.Counter(self.word)
-
-    def isStringRepeated(self):
-        self.repeattracker = False
-        for k in self.counter:
-            if self.counter[k] > 1:
-                self.repeattracker = True
-        return self.repeattracker
-
+        self.isAlpha = True
+        #WTF
+        for char in self.word:
+            if not char.isalpha():
+                print(char)
+                self.isRepeated = False
+                self.play()
+    # Evaluates the user input for a character that is within the selected string
     def evaluate(self, choice):
 
-        if choice in self.word and choice not in self.guessed_correctly and choice != ''and choice != float():
+        if choice in self.word and choice not in self.guessed_correctly and choice.isalpha():
             self.correct()
         elif 'hint count' in self.user_choice:
-            if self.hint_count<=1:
+            if self.hint_count<=1 and self.hint_count != 0:
                 print("You have requested "+ str(self.hint_count) +" hints.")
             else:
                 print("You have requested " + str(self.hint_count) + " hints.")
         elif 'hint' in choice:
             self.hint()
         elif 'mistakes' in self.user_choice:
-            if self.mistakes <= 1:
-                print("You have made "+str(self.mistakes)+" mistake.")
+            if self.mistakes <= 1 and self.mistakes != 0:
+                print("You have made " + str(self.mistakes) + " mistake.")
             else:
                 print("You have made "+str(self.mistakes)+" mistakes.")
         else:
             self.incorrect()
-
+    # Provides and tracks hints for the user
     def hint(self):
         if "hint" in self.user_choice and self.hint_count < int(self.allowable_hints):
             self.hint_count+=1
@@ -83,16 +96,21 @@ class hangman_logic:
             print("Your hint is '" +self.letter_hint.upper()+ ".'")
         else:
             print("You have used too many hints!")
-
+    # Tracks the amount of correctly guessed characters
     def correct(self):
         if self.user_choice in self.word and len(self.guessed_correctly) <= len(self.word):
             self.guessed_correctly.append(self.user_choice)
+            if self.user_choice in self.charRepeated:
+                self.guessed_correctly.append(self.user_choice)
             print("\n'"+self.user_choice.upper() + "' was correct.\n")
-
+            print(self.guessed_correctly)
+    # Tracks the amount of incorrectly guessed characters
     def incorrect(self):
         if self.user_choice in self.guessed_correctly:
             self.mistakes += 1
             print("\nYou already guessed '" + self.user_choice.upper() + ",' try again. \n")
+        elif not self.user_choice.isalpha():
+            print("\nPlease insert a character. \n")
         elif self.mistakes < len(self.word):
             self.mistakes += 1
             self.incorrectly_guessed.append(self.user_choice)
@@ -107,11 +125,15 @@ class hangman_logic:
                 self.play()
             else:
                 sys.exit(1)
-
+    # Initiates the play sequence
     def play(self):
         self.picker = random.randint(0, len(self.words)) - 2
         self.word_selector()
-        print("Your word is: " + str(len(self.word)) + " characters long.")
+        self.isRepeated()
+        if self.isRepeated is True:
+            print("Your word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).")
+        else:
+            print("Your word is: " + str(len(self.word)) + " characters long.")
         time.sleep(1.5)
         self.ask_mistakes()
         while self.is_int is False:
@@ -135,8 +157,5 @@ class hangman_logic:
                     sys.exit(1)
             self.user_choice = input("\nPick a letter:").lower()
             self.evaluate(self.user_choice)
-            print(self.guessed_correctly)
-
-#After logic, add in features for settings or to replay in a separate class.
 hangman = hangman_logic()
 hangman.play()
