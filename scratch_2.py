@@ -1,6 +1,6 @@
 #DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
 #SSN: 123-45-7890
-#BUGS: array of correctly guessed letters are printed, alpha checker
+#BUGS: non-valid category thrown out inf times
 #NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
 #NOTES FOR FUTURE DEV: Categories by dictionary
@@ -11,7 +11,7 @@ import sys
 class hangman_logic:
     #Initializes base variables
     def __init__(self):
-        self.words = ['abaft', 'ill-fated']
+        self.words = {'movies':['full metal jacket', 'Major Payne', 'American Sniper', 'Lone Survivor', 'twelve strong']}
         self.guessed_correctly=[]
         self.incorrectly_guessed=[]
         self.mistakes=0
@@ -27,7 +27,7 @@ class hangman_logic:
         try:
             int(self.allowable_mistakes)
             self.is_int = True
-            if self.allowable_mistakes != '' and int(self.allowable_mistakes) <= len(self.word):
+            if self.allowable_mistakes.isdigit() and int(self.allowable_mistakes) <= len(self.word):
                 print("The maximum number of mistakes you can make this round is: " + self.allowable_mistakes + '\n')
             elif int(self.allowable_mistakes) > len(self.word):
                 print("\nThe maximum amount of mistakes allowed is up to the length of the word.\n")
@@ -58,16 +58,27 @@ class hangman_logic:
                 self.charRepeated.append(k)
                 self.isRepeated = True
     # Selects a string for the round
-    def word_selector(self):
-        self.word = self.words[self.picker].lower()
-        self.counter= collections.Counter(self.word)
-        self.isAlpha = True
-        #WTF
+    def word_selector(self,category):
+        self.properCategory = False
+        if category in self.words:
+            self.properCategory = True
+            print("\nYou selected: '" +self.category+ "' as the category for this round.\n")
+            self.picker = random.randint(0, len(self.words[self.category])) - 2
+            self.selected_category = self.words[category]
+            self.word = self.selected_category[self.picker].lower()
+            self.counter = collections.Counter(self.word)
+            self.isAlpha = True
+        else:
+            self.properCategory=False
+            print("\nThat is not a valid category, try again...\n")
+        ####WTF####
+        '''
         for char in self.word:
             if not char.isalpha():
                 print(char)
                 self.isRepeated = False
                 self.play()
+                '''
     # Evaluates the user input for a character that is within the selected string
     def evaluate(self, choice):
 
@@ -103,7 +114,6 @@ class hangman_logic:
             if self.user_choice in self.charRepeated:
                 self.guessed_correctly.append(self.user_choice)
             print("\n'"+self.user_choice.upper() + "' was correct.\n")
-            print(self.guessed_correctly)
     # Tracks the amount of incorrectly guessed characters
     def incorrect(self):
         if self.user_choice in self.guessed_correctly:
@@ -127,8 +137,11 @@ class hangman_logic:
                 sys.exit(1)
     # Initiates the play sequence
     def play(self):
-        self.picker = random.randint(0, len(self.words)) - 2
-        self.word_selector()
+        self.category=input("What category of words do you want?").lower()
+        self.word_selector(self.category)
+        while self.properCategory is False:
+            self.word_selector(self.category)
+        time.sleep(.300)
         self.isRepeated()
         if self.isRepeated is True:
             print("Your word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).")
