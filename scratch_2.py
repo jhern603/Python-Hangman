@@ -1,6 +1,5 @@
-#DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
-#SSN: 123-45-7890
-#BUGS: non-valid category thrown out inf times, if word contains letter more than two times program will not account for them
+#DEV: JOSE HERNANDEZ
+#BUGS: non-valid category thrown out inf times
 #NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
 #NOTES FOR FUTURE DEV: Categories by dictionary
@@ -60,7 +59,7 @@ class hangman_logic:
         for k in self.counter:
             if self.counter[k] > 1:
                 self.charRepeated.append(k)
-                self.isRepeated = True
+                self.isRepeated_bool = True
     # Selects a string for the round
     def word_selector(self, category):
         if category in self.words:
@@ -115,11 +114,9 @@ class hangman_logic:
     # Tracks the amount of correctly guessed characters
     def correct(self):
         if self.user_choice in self.word and len(self.guessed_correctly) <= len(self.word):
-            self.guessed_correctly.append(self.user_choice)
-            if self.user_choice in self.charRepeated:
-                self.guessed_correctly.append(self.user_choice)
+            self.guessed_correctly += [self.user_choice]*self.counter[self.user_choice]
             print("\n'"+self.user_choice.upper() + "' was correct.\n")
-            print(' '.join(self.guessed_correctly))
+            print("You have guessed the following letters so far:", ' '.join(self.guessed_correctly))
     # Tracks the amount of incorrectly guessed characters
     def incorrect(self):
         if self.user_choice in self.guessed_correctly:
@@ -151,7 +148,7 @@ class hangman_logic:
             self.word_selector(self.category)
         time.sleep(.300)
         self.isRepeated()
-        if self.isRepeated is True:
+        if self.isRepeated_bool is True:
             print("Your word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).")
         else:
             print("Your word is: " + str(len(self.word)) + " characters long.")
@@ -170,7 +167,7 @@ class hangman_logic:
                 print("You win! The word was '" + self.word + "!'\n")
                 self.win_again = input("Do you want to play again? ").lower()
                 self.win_counter+=1
-                print(self.win_counter)
+                print("You have won",self.win_counter,"time(s)")
                 self.guessed_correctly = []
                 self.incorrectly_guessed = []
                 if 'y' in self.win_again:
