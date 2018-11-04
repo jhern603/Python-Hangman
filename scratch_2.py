@@ -1,7 +1,7 @@
 #DEV: JOSE HERNANDEZ
 #BUGS: non-valid category thrown out inf times
 #NOTES: Added ability to check for repeated characters
-#TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
+#TODO: Add in inf mistakes and hints capability
 #NOTES FOR FUTURE DEV: Categories by dictionary
 import random
 import time
@@ -62,16 +62,18 @@ class hangman_logic:
                 self.isRepeated_bool = True
     # Selects a string for the round
     def word_selector(self, category):
-        if category in self.words:
+        self.picker = random.randint(0, len(self.words[category])) - 2
+        self.selected_category = self.words[category]
+        self.word = self.selected_category[self.picker].lower()
+        self.word_ = self.word.replace(' ', '')
+        if category in self.words and self.word_.isalpha() is True:
             self.properCategory = True
             print("\nYou selected: '" + category + "' as the category for this round.\n")
-            self.picker = random.randint(0, len(self.words[category])) - 2
-            self.selected_category = self.words[category]
-            self.word = self.selected_category[self.picker].lower()
-            self.word_=self.word.replace(' ','')
             self.word_sorted=sorted(self.word_)
             self.counter = collections.Counter(self.word)
             self.isAlpha = True
+        elif self.word_.isalpha() is False:
+            self.word_selector(category)
         else:
             print("\nThat is not a valid category, try again...\n")
         ####WTF####
@@ -146,21 +148,17 @@ class hangman_logic:
         self.word_selector(self.category)
         while self.properCategory is False:
             self.word_selector(self.category)
-        time.sleep(.300)
         self.isRepeated()
         if self.isRepeated_bool is True:
-            print("Your word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).")
+            print("\nYour word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).\n")
         else:
-            print("Your word is: " + str(len(self.word)) + " characters long.")
-        time.sleep(1.5)
+            print("\nYour word is: " + str(len(self.word)) + " characters long.\n")
         self.ask_mistakes()
         while self.is_int is False:
             self.ask_mistakes()
-        time.sleep(.300)
         self.ask_hints()
         while self.is_inth is False:
             self.ask_hints()
-        time.sleep(.300)
         while True:
             self.guessed_correctly_sorted=sorted(self.guessed_correctly)
             if self.word_sorted == self.guessed_correctly_sorted:
