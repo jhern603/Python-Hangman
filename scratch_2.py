@@ -26,8 +26,8 @@ class hangman_logic:
         self.hint_count=0
         self.win_counter=0
         self.loss_counter=0
-        print("\n\nHangman is starting soon...\n")
-        time.sleep(1)
+    def __str__(self):
+            return "\nERROR: Please start the game by using the '.play()' method!"
     #Asks the user for max number of mistakes for that round
     def ask_mistakes(self):
         self.allowable_mistakes = input("What do you want to be the maximum number of mistakes? ")
@@ -69,6 +69,8 @@ class hangman_logic:
             self.picker = random.randint(0, len(self.words[category])) - 2
             self.selected_category = self.words[category]
             self.word = self.selected_category[self.picker].lower()
+            self.word_=self.word.replace(' ','')
+            self.word_sorted=sorted(self.word_)
             self.counter = collections.Counter(self.word)
             self.isAlpha = True
         else:
@@ -105,6 +107,8 @@ class hangman_logic:
             self.hint_count+=1
             self.num_picker = random.randint(0, len(self.word) - 1)
             self.letter_hint=self.word[self.num_picker]
+            if ' 'in self.letter_hint:
+                self.hint()
             print("Your hint is '" +self.letter_hint.upper()+ ".'")
         else:
             print("You have used too many hints!")
@@ -139,6 +143,7 @@ class hangman_logic:
                 sys.exit(1)
     # Initiates the play sequence
     def play(self):
+        print("\n\nHangman is starting soon...\n")
         print("The available categories to pick from are",', '.join(self.keys))
         self.category = input("What category of words do you want?").lower()
         self.word_selector(self.category)
@@ -160,7 +165,8 @@ class hangman_logic:
             self.ask_hints()
         time.sleep(.300)
         while True:
-            if len(self.word) == len(self.guessed_correctly):
+            self.guessed_correctly_sorted=sorted(self.guessed_correctly)
+            if self.word_sorted == self.guessed_correctly_sorted:
                 print("You win! The word was '" + self.word + "!'\n")
                 self.win_again = input("Do you want to play again? ").lower()
                 self.win_counter+=1
