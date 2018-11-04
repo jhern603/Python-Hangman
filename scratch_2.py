@@ -1,7 +1,7 @@
 #DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
 #SSN: 123-45-7890
-#BUGS: non-valid category thrown out inf times
-#NOTES: Added ability to check for repeated characters
+#BUGS: non-valid category thrown out inf times, if word contains letter more than two times program will not account for them
+#NOTES: Added ability to check for repeated characters, completed categories system
 #TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
 #NOTES FOR FUTURE DEV: Categories by dictionary
 import random
@@ -9,9 +9,17 @@ import time
 import collections
 import sys
 class hangman_logic:
-    #Initializes base variables
+    words = {'movies': ['full metal jacket', 'Major Payne', 'American Sniper', 'Lone Survivor', 'twelve strong'], 'games':["hangman","tic tac toe","Monopoly"]}
+    keys=[]
+    for key, value in words.items():
+        keys.append(key)
+    is_int = False
+    is_inth = False
+    isRepeated = False
+    properCategory = False
+    charRepeated = []
+    #Initializes instance variables
     def __init__(self):
-        self.words = {'movies':['full metal jacket', 'Major Payne', 'American Sniper', 'Lone Survivor', 'twelve strong']}
         self.guessed_correctly=[]
         self.incorrectly_guessed=[]
         self.mistakes=0
@@ -22,7 +30,6 @@ class hangman_logic:
         time.sleep(1)
     #Asks the user for max number of mistakes for that round
     def ask_mistakes(self):
-        self.is_int = False
         self.allowable_mistakes = input("What do you want to be the maximum number of mistakes? ")
         try:
             int(self.allowable_mistakes)
@@ -37,7 +44,6 @@ class hangman_logic:
             print("Strings are not accepted: insert an integer!")
     # Asks the user for max number of hints for that round
     def ask_hints(self):
-        self.is_inth=False
         self.allowable_hints = input("What do you want the maximum number of hints to be? ")
         try:
             int(self.allowable_mistakes)
@@ -51,26 +57,23 @@ class hangman_logic:
             self.is_inth = False
     # Check for character repetition in selected string
     def isRepeated(self):
-        self.isRepeated = False
-        self.charRepeated = []
         for k in self.counter:
             if self.counter[k] > 1:
                 self.charRepeated.append(k)
                 self.isRepeated = True
     # Selects a string for the round
-    def word_selector(self,category):
-        self.properCategory = False
+    def word_selector(self, category):
         if category in self.words:
             self.properCategory = True
-            print("\nYou selected: '" +self.category+ "' as the category for this round.\n")
-            self.picker = random.randint(0, len(self.words[self.category])) - 2
+            print("\nYou selected: '" + category + "' as the category for this round.\n")
+            self.picker = random.randint(0, len(self.words[category])) - 2
             self.selected_category = self.words[category]
             self.word = self.selected_category[self.picker].lower()
             self.counter = collections.Counter(self.word)
             self.isAlpha = True
         else:
-            self.properCategory=False
             print("\nThat is not a valid category, try again...\n")
+            self.properCategory=False
         ####WTF####
         '''
         for char in self.word:
@@ -81,7 +84,6 @@ class hangman_logic:
                 '''
     # Evaluates the user input for a character that is within the selected string
     def evaluate(self, choice):
-
         if choice in self.word and choice not in self.guessed_correctly and choice.isalpha():
             self.correct()
         elif 'hint count' in self.user_choice:
@@ -114,6 +116,7 @@ class hangman_logic:
             if self.user_choice in self.charRepeated:
                 self.guessed_correctly.append(self.user_choice)
             print("\n'"+self.user_choice.upper() + "' was correct.\n")
+            print(' '.join(self.guessed_correctly))
     # Tracks the amount of incorrectly guessed characters
     def incorrect(self):
         if self.user_choice in self.guessed_correctly:
@@ -137,10 +140,8 @@ class hangman_logic:
                 sys.exit(1)
     # Initiates the play sequence
     def play(self):
-        self.category=input("What category of words do you want?").lower()
-        self.word_selector(self.category)
-        while self.properCategory is False:
-            self.word_selector(self.category)
+        print("The available categories to pick from are",', '.join(self.keys))
+        self.category = input("What category of words do you want?").lower()
         time.sleep(.300)
         self.isRepeated()
         if self.isRepeated is True:
@@ -161,7 +162,7 @@ class hangman_logic:
                 print("You win! The word was '" + self.word + "!'\n")
                 self.win_again = input("Do you want to play again? ").lower()
                 self.win_counter+=1
-                print(self.win_counter)
+                print("You have won",self.win_counter,"times so far.")
                 self.guessed_correctly = []
                 self.incorrectly_guessed = []
                 if 'y' in self.win_again:
@@ -170,5 +171,5 @@ class hangman_logic:
                     sys.exit(1)
             self.user_choice = input("\nPick a letter:").lower()
             self.evaluate(self.user_choice)
-hangman = hangman_logic()
+hangman=hangman_logic()
 hangman.play()
