@@ -1,7 +1,7 @@
 #DEV: JOSE 'POOPITYSCOOP' HERNANDEZ
 #SSN: 123-45-7890
 #BUGS: non-valid category thrown out inf times, if word contains letter more than two times program will not account for them
-#NOTES: Added ability to check for repeated characters, completed categories system
+#NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability, add in a mulligan for words with non-alpha characters
 #NOTES FOR FUTURE DEV: Categories by dictionary
 import random
@@ -73,7 +73,6 @@ class hangman_logic:
             self.isAlpha = True
         else:
             print("\nThat is not a valid category, try again...\n")
-            self.properCategory=False
         ####WTF####
         '''
         for char in self.word:
@@ -142,6 +141,9 @@ class hangman_logic:
     def play(self):
         print("The available categories to pick from are",', '.join(self.keys))
         self.category = input("What category of words do you want?").lower()
+        self.word_selector(self.category)
+        while self.properCategory is False:
+            self.word_selector(self.category)
         time.sleep(.300)
         self.isRepeated()
         if self.isRepeated is True:
@@ -162,7 +164,7 @@ class hangman_logic:
                 print("You win! The word was '" + self.word + "!'\n")
                 self.win_again = input("Do you want to play again? ").lower()
                 self.win_counter+=1
-                print("You have won",self.win_counter,"times so far.")
+                print(self.win_counter)
                 self.guessed_correctly = []
                 self.incorrectly_guessed = []
                 if 'y' in self.win_again:
