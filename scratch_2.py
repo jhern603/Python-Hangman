@@ -2,7 +2,6 @@
 #BUGS: non-valid category thrown out inf times
 #NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability
-#NOTES FOR FUTURE DEV: Categories by dictionary
 import random
 import time
 import collections
