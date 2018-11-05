@@ -2,10 +2,7 @@
 #BUGS: non-valid category thrown out inf times
 #NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability
-import random
-import time
-import collections
-import sys
+import random, sys, collections
 class hangman_logic:
     words = {'movies': ['full metal jacket', 'Major Payne', 'American Sniper', 'Lone Survivor', 'twelve strong'], 'games':["hangman","tic tac toe","Monopoly"]}
     keys=[]
@@ -164,14 +161,29 @@ class hangman_logic:
                 print("You win! The word was '" + self.word + "!'\n")
                 self.win_again = input("Do you want to play again? ").lower()
                 self.win_counter+=1
-                print("You have won",self.win_counter,"time(s)")
+                print("\nYou have won",self.win_counter,"time(s)\n")
                 self.guessed_correctly = []
                 self.incorrectly_guessed = []
-                if 'y' in self.win_again:
+                if 'yes' in self.win_again:
                     self.play()
                 else:
+                    print("Thank you for playing!")
                     sys.exit(1)
             self.user_choice = input("\nPick a letter:").lower()
-            self.evaluate(self.user_choice)
+            if self.user_choice == self.word:
+                print("You win! The word was '" + self.word + "!'\n")
+                self.win_again = input("Do you want to play again? ").lower()
+                self.win_counter += 1
+                print("\nYou have won", self.win_counter, "time(s)\n")
+                self.guessed_correctly = []
+                self.incorrectly_guessed = []
+                if 'yes' in self.win_again:
+                    self.play()
+                else:
+                    print("Thank you for playing!")
+                    sys.exit(1)
+            else:
+                self.evaluate(self.user_choice)
+
 hangman=hangman_logic()
 hangman.play()
