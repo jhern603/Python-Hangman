@@ -1,5 +1,5 @@
 #DEV: JOSE HERNANDEZ
-#BUGS: non-valid category thrown out inf times
+#BUGS:
 #NOTES: Added ability to check for repeated characters
 #TODO: Add in inf mistakes and hints capability
 import random, sys, collections
@@ -70,16 +70,6 @@ class hangman_logic:
             self.isAlpha = True
         elif self.word_.isalpha() is False:
             self.word_selector(category)
-        else:
-            print("\nThat is not a valid category, try again...\n")
-        ####WTF####
-        '''
-        for char in self.word:
-            if not char.isalpha():
-                print(char)
-                self.isRepeated = False
-                self.play()
-                '''
     # Evaluates the user input for a character that is within the selected string
     def evaluate(self, choice):
         if choice in self.word and choice not in self.guessed_correctly and choice.isalpha():
@@ -136,25 +126,7 @@ class hangman_logic:
                 self.play()
             else:
                 sys.exit(1)
-    # Initiates the play sequence
-    def play(self):
-        print("\n\nHangman is starting soon...\n")
-        print("The available categories to pick from are",', '.join(self.keys))
-        self.category = input("What category of words do you want?").lower()
-        self.word_selector(self.category)
-        while self.properCategory is False:
-            self.word_selector(self.category)
-        self.isRepeated()
-        if self.isRepeated_bool is True:
-            print("\nYour word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).\n")
-        else:
-            print("\nYour word is: " + str(len(self.word)) + " characters long.\n")
-        self.ask_mistakes()
-        while self.is_int is False:
-            self.ask_mistakes()
-        self.ask_hints()
-        while self.is_inth is False:
-            self.ask_hints()
+    def win(self):
         while True:
             self.guessed_correctly_sorted=sorted(self.guessed_correctly)
             if self.word_sorted == self.guessed_correctly_sorted:
@@ -184,6 +156,29 @@ class hangman_logic:
                     sys.exit(1)
             else:
                 self.evaluate(self.user_choice)
-
+    # Initiates the play sequence
+    def play(self):
+        print("\nThe available categories to pick from are",', '.join(self.keys))
+        self.category = input("\nWhat category of words do you want?\n").lower()
+        if self.category in self.keys:
+            print("\n\nHangman is starting soon...\n")
+            self.word_selector(self.category)
+            while self.properCategory is False:
+                self.word_selector(self.category)
+            self.isRepeated()
+            if self.isRepeated_bool is True:
+                print("\nYour word is: " + str(len(self.word)) + " characters long and has "+ str(len(self.charRepeated)) +" repeated character(s).\n")
+            else:
+                print("\nYour word is: " + str(len(self.word)) + " characters long.\n")
+            self.ask_mistakes()
+            while self.is_int is False:
+                self.ask_mistakes()
+            self.ask_hints()
+            while self.is_inth is False:
+                self.ask_hints()
+            self.win()
+        else:
+            print("\nThat is not a valid category.\n")
+            self.play()
 hangman=hangman_logic()
 hangman.play()
